@@ -6,16 +6,16 @@
         <img src="~assets/logo.png" alt="">
       </div>
       <!-- 登录表单区域 -->
-      <el-form class="login_from">
-        <el-form-item>
-          <el-input></el-input>
+      <el-form class="login_from" ref="loginFormRef" :rules="loginFormRules" :model="loginForm">
+        <el-form-item prop="username">
+          <el-input v-model="loginForm.username" prefix-icon="el-icon-user-solid"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input></el-input>
+        <el-form-item prop="password">
+          <el-input v-model="loginForm.password" type="password" prefix-icon="el-icon-lock"></el-input>
         </el-form-item>
         <el-form-item class="btns">
-          <el-button type="primary">登录</el-button>
-          <el-button type="info">重置</el-button>
+          <el-button type="primary" @click="login">登录</el-button>
+          <el-button type="info" @click="resetLoginForm">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -25,7 +25,56 @@
 
 <script>
   export default {
-    name: "Login"
+    name: "Login",
+    data() {
+      return {
+        // 这是登录表单的数据绑定对象
+        loginForm: {
+          username: 'admin',
+          password: '123456',
+        },
+        // 这是表单的验证规则对象
+        loginFormRules: {
+          // 验证用户名是否合法
+          username: [
+            { required: true, message: '请输入登录名称', trigger: 'blur' },
+            { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+          ],
+          // 验证密码是否合法
+          password: [
+            { required: true, message: '请输入密码', trigger: 'blur' },
+            { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+          ]
+        }
+      }
+    },
+    methods: {
+      resetLoginForm() {
+        // 对整个表单进行重置，将所有字段值重置为初始值并移除校验结果
+        this.$refs.loginFormRef.resetFields()
+      },
+      login() {
+        // 对整个表单进行校验的方法，参数为一个回调函数。该回调函数会在校验结束后被调用，
+        // 并传入两个参数：是否校验成功和未通过校验的字段。若不传入回调函数，则会返回一个 promise
+        this.$refs.loginFormRef.validate((valid, res) => {
+          // console.log(valid);
+          // console.log(res);
+          if(!valid) return;
+          this.$http.post("login", this.loginForm).then(res => {
+            if(res.data.meta.status !== 200) return this.$message.error('登录失败');
+            this.$message.success('登录成功');
+            // 1、登录成功之后的 token ，保存到客户的 sessionStorage 中
+            //   1.1、项目中出了登录之外的其他API接口，必须在登陆后才能访问
+            //   2.2、token 只应在当前网站打开期间生效，所以将 token 保存在 sessionStorage 中
+            console.log(res);
+            console.log(res.data.data.token);
+            window.sessionStorage.setItem("token", res.data.data.token)
+            // 2、通过编程时导航跳转到后台主页，路由地址是 /home
+            this.$router.push('/home')
+          })
+        })
+      }
+    }
   };
 </script>
 
