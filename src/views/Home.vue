@@ -12,28 +12,42 @@
     <!-- 页面主题区域 -->
     <el-container>
       <!-- 侧边栏 -->
-      <el-aside width="200px">
+      <el-aside :width="isClooapse ? '64px': '200px'">
+        <div class="toggle-button" @click="togglebuttom">|||</div>
         <!-- 侧边栏菜单区域 -->
-        <el-menu background-color="#333744" text-color="#fff" active-text-color="rgb(64, 158, 255)">
+        <el-menu 
+          background-color="#333744" 
+          text-color="#fff" 
+          active-text-color="rgb(64, 158, 255)"
+          unique-opened
+          :collapse="isClooapse"
+          :collapse-transition="false"
+          :router="true"
+          :default-active="activePath">
           <!-- 一级菜单 -->
-          <el-submenu :index="item.id + ''" v-for="item in menulist" :key="item.id">
+          <el-submenu :index="item.id + ''" 
+            v-for="(item, index) in menulist" 
+            :key="item.id">
             <!-- 一级菜单的模板区域 -->
             <template slot="title">
               <!-- 图标 -->
-              <i class="el-icon-location"></i>
+              <i :class="icons[index]"></i>
               <!-- 文本 -->
               <span>{{item.authName}}</span>
             </template>
+
             <!-- 二级菜单 -->
-            <el-menu-item v-for="child in item.children" :index="child.id + ''" :key="child.id">
-              <i class="el-icon-setting"></i>
+            <el-menu-item v-for="child in item.children" :index="'/' + child.path" :key="child.id" @click="saveNavState('/' + child.path)">
+              <i class="el-icon-menu"></i>
               <span slot="title">{{child.authName}}</span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
       <!-- 页面主题区域 -->
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -43,7 +57,17 @@
     name: "Home",
     data() {
       return {
-        menulist: []
+        menulist: [],
+        icons: [
+          'iconfont icon-users', 
+          'iconfont icon-tijikongjian', 
+          'iconfont icon-shangpin',
+          'iconfont icon-danju',
+          'iconfont icon-baobiao'],
+          // 是否折叠
+        isClooapse: false,
+        // 被激活的连接地址
+        activePath: ''
       }
     },
     methods: {
@@ -55,12 +79,20 @@
         this.$http.get('menus').then(res => {
           if(res.data.meta.status !== 200) return this.$message.console.error(res.data.meat.msg);
           this.menulist = res.data.data
-          console.log(this.menulist);
         })
+      },
+      // 点击按钮切换折叠与展开
+      togglebuttom() {
+        this.isClooapse = !this.isClooapse
+      },
+      saveNavState(activepath) {
+        window.sessionStorage.setItem('activepath', activepath)
+        this.activePath = activepath
       }
     },
     created() {
       this.getMenuList()
+      this.activePath = window.sessionStorage.getItem('activepath')
     }
   };
 </script>
@@ -92,8 +124,23 @@
 }
 .el-aside {
   background-color: #333744;
+  .el-menu {
+    border-right: 0;
+  }
 }
 .el-main {
   background-color: #EAEDF1;
+}
+.iconfont {
+  margin-right: 10px;
+}
+.toggle-button {
+  background-color: #4a5064;
+  font-size: 10px;
+  line-height: 24px;
+  text-align: center;
+  letter-spacing: 0.2em;
+  // 鼠标放上为手
+  cursor: pointer;
 }
 </style>
