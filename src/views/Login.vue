@@ -1,25 +1,27 @@
 <template>
   <div class="login_container">
-    <div class="login_box">
-      <!-- 头像区域 -->
-      <div class="avatar_box">
-        <img src="~assets/logo.png" alt="">
+    <div class="big_box">
+      <img src="~assets/logo.png" alt="" style="width: 440px">
+      <div class="login_box">
+        <h2>专升本信息管理系统</h2>
+        <!-- 登录表单区域 -->
+        <el-form class="login_from" ref="loginFormRef" :rules="loginFormRules" :model="loginForm">
+          <el-form-item class="text" prop="username">
+            <el-input v-model="loginForm.username" prefix-icon="el-icon-user-solid"></el-input>
+          </el-form-item>
+          <el-form-item class="text" prop="password">
+            <el-input v-model="loginForm.password" type="password" prefix-icon="el-icon-lock"></el-input>
+          </el-form-item>
+          <el-form-item class="btns">
+            <el-button type="primary" @click="login">登录</el-button>
+            <el-button type="info" id="regin" @click="Register">注册</el-button>
+          </el-form-item>
+          <box id="find">
+            <el-link type="info" @click="FindPsw">找回密码</el-link>
+          </box>
+        </el-form>
       </div>
-      <!-- 登录表单区域 -->
-      <el-form class="login_from" ref="loginFormRef" :rules="loginFormRules" :model="loginForm">
-        <el-form-item prop="username">
-          <el-input v-model="loginForm.username" prefix-icon="el-icon-user-solid"></el-input>
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input v-model="loginForm.password" type="password" prefix-icon="el-icon-lock"></el-input>
-        </el-form-item>
-        <el-form-item class="btns">
-          <el-button type="primary" @click="login">登录</el-button>
-          <el-button type="info" @click="resetLoginForm">重置</el-button>
-        </el-form-item>
-      </el-form>
     </div>
-    
   </div>
 </template>
 
@@ -49,17 +51,19 @@
       }
     },
     methods: {
-      resetLoginForm() {
-        // 对整个表单进行重置，将所有字段值重置为初始值并移除校验结果
-        this.$refs.loginFormRef.resetFields()
+      Register() {
+        this.$router.push('/register')
+      },
+      FindPsw() {
+        this.$router.push('/findpassword')
       },
       login() {
-        // 对整个表单进行校验的方法，参数为一个回调函数。该回调函数会在校验结束后被调用，
-        // 并传入两个参数：是否校验成功和未通过校验的字段。若不传入回调函数，则会返回一个 promise
         this.$refs.loginFormRef.validate((valid, res) => {
-          // console.log(valid);
-          // console.log(res);
           if(!valid) return;
+
+          
+          // 在此处发送网络请求
+
           this.$http.post("login", this.loginForm).then(res => {
             if(res.data.meta.status !== 200) return this.$message.error('登录失败');
             this.$message.success('登录成功');
@@ -80,46 +84,49 @@
 
 <style lang="less" scoped>
   .login_container {
-    background-color: #2b4b6b;
+    background-color: #024153;
+    overflow: hidden;
     height: 100%;
+  }
+  h2 {
+    text-align: center;
+  }
+  .big_box {
+    width: 750px;
+    height: 450px;
+    margin: 160px auto;
+    background-color: #99BDC9;
   }
   .login_box {
     width: 450px;
     height: 300px;
-    background-color: #fff;
+    background-color: #B2CFD7;
     border-radius: 3px;
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
   }
-  .avatar_box {
-    height: 130px;
-    width: 130px;
-    border: 1px solid #eee;
-    border-radius: 50%;
-    padding: 10px;
-    box-shadow: 0 0 10px #ddd;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #fff;
-    img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background-color: #eee;
-    }
-  }
   .btns {
-    display: flex;
-    justify-content: flex-end;
+    margin-left: 100px;
   }
   .login_from {
     position: absolute;
-    width: 100%;
+    width: 85%;
     box-sizing: border-box;
     padding: 0 20px;
     bottom: 0;
+  }
+  #regin {
+    position: relative;
+    left: 50px;
+  }
+  #find {
+    position: relative;
+    bottom: 48px;
+    left: 348px;
+  }
+  .text {
+    margin-left: 20%;
   }
 </style>

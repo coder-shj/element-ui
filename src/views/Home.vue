@@ -3,7 +3,7 @@
     <!-- 头部区域 -->
     <el-header>
       <div>
-        <img src="~assets/logo.png" alt="">
+        <!-- <img src="~assets/logo.png" alt=""> -->
         <span>电商后台管理系统</span>
       </div>
       <el-button type="info" @click="logout">退出</el-button>
@@ -14,34 +14,29 @@
       <!-- 侧边栏 -->
       <el-aside :width="isClooapse ? '64px': '200px'">
         <div class="toggle-button" @click="togglebuttom">|||</div>
-        <!-- 侧边栏菜单区域 -->
+        <!-- 侧边栏菜单区域 --> 
         <el-menu 
           background-color="#333744" 
           text-color="#fff" 
           active-text-color="rgb(64, 158, 255)"
-          unique-opened
           :collapse="isClooapse"
           :collapse-transition="false"
           :router="true"
           :default-active="activePath">
-          <!-- 一级菜单 -->
-          <el-submenu :index="item.id + ''" 
-            v-for="(item, index) in menulist" 
-            :key="item.id">
+
+          <el-menu-item v-for="(item, index) in menulist"
+            :index="path[index]" 
+            :key="index"
+            @click="MenuClick(index)">
             <!-- 一级菜单的模板区域 -->
             <template slot="title">
               <!-- 图标 -->
               <i :class="icons[index]"></i>
               <!-- 文本 -->
-              <span>{{item.authName}}</span>
+              <span>{{item}}</span>
             </template>
+          </el-menu-item>
 
-            <!-- 二级菜单 -->
-            <el-menu-item v-for="child in item.children" :index="'/' + child.path" :key="child.id" @click="saveNavState('/' + child.path)">
-              <i class="el-icon-menu"></i>
-              <span slot="title">{{child.authName}}</span>
-            </el-menu-item>
-          </el-submenu>
         </el-menu>
       </el-aside>
       <!-- 页面主题区域 -->
@@ -57,17 +52,45 @@
     name: "Home",
     data() {
       return {
-        menulist: [],
+        menulist: [
+          '(桌面)超级管理员',
+          '通知公告',
+          '基础信息管理',
+          '注册管理',
+          '报名信息管理',
+          '审核官立',
+          '考场安排管理',
+          '成绩管理',
+          '录取管理',
+          '管理员信息管理'
+        ],
         icons: [
+          'el-icon-menu',
           'iconfont icon-users', 
           'iconfont icon-tijikongjian', 
           'iconfont icon-shangpin',
           'iconfont icon-danju',
-          'iconfont icon-baobiao'],
+          'iconfont icon-baobiao',
+          'iconfont icon-users',
+          'iconfont icon-users',
+          'iconfont icon-users',
+          'iconfont icon-users'],
           // 是否折叠
         isClooapse: false,
         // 被激活的连接地址
-        activePath: ''
+        activePath: '',
+        path: [
+          'desktop',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          'manner'
+        ]
       }
     },
     methods: {
@@ -75,24 +98,35 @@
         window.sessionStorage.clear()
         this.$router.push('/login')
       },
-      getMenuList() {
-        this.$http.get('menus').then(res => {
-          if(res.data.meta.status !== 200) return this.$message.console.error(res.data.meat.msg);
-          this.menulist = res.data.data
-        })
-      },
+      // getMenuList() {
+      //   this.$http.get('menus').then(res => {
+      //     if(res.data.meta.status !== 200) return this.$message.console.error(res.data.meat.msg);
+      //     this.menulist = res.data.data
+      //   })
+      // },
       // 点击按钮切换折叠与展开
       togglebuttom() {
         this.isClooapse = !this.isClooapse
       },
-      saveNavState(activepath) {
-        window.sessionStorage.setItem('activepath', activepath)
-        this.activePath = activepath
+      // saveNavState(activepath) {
+      //   window.sessionStorage.setItem('activepath', activepath)
+      //   this.activePath = activepath
+      // }
+      MenuClick(index) {
+        console.log(index);
+        window.sessionStorage.setItem('activepath', index)
+        if(index == 0) {
+
+        }else if(index == 9) {
+
+        }else {
+
+        }
       }
     },
     created() {
-      this.getMenuList()
-      this.activePath = window.sessionStorage.getItem('activepath')
+      // this.getMenuList()
+      // this.activePath = window.sessionStorage.getItem('activepath')
     }
   };
 </script>

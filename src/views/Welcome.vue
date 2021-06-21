@@ -1,6 +1,6 @@
 <template>
   <div class="Welcome">
-    <h2>欢迎来到电商后台管理系统</h2>
+    <h2>欢迎使用湖北理工学院“专升本”信息管理系统</h2>
   </div>
 </template>
 
