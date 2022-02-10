@@ -15,19 +15,43 @@
         </el-col>
       </el-row>
       <!-- 角色列表区域 -->
-      <el-table :data="rolesList" border stripe>
+      <el-table :data="rolesList" lazy border stripe>
         <!-- 展开列 type="expand" -->
-        <el-table-column type="expand"></el-table-column>
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <el-row v-for="(item1,index) in props.row.children" :key="item1.id" :class="['botter-bd', index==0?'botter-bt':'']">
+              <!-- 渲染一级权限 -->
+              <el-col :span="5">
+                <el-tag closable @close="DeleteRight(props.row.id,item1.id)">{{item1.authName}}</el-tag>
+                <i class="el-icon-caret-right"></i>
+              </el-col>
+              <!-- 渲染二级、三级权限 -->
+              <el-col :span="19">
+                <!-- 循环二级权限 -->
+                <el-row v-for="item2 in item1.children" :key="item2.id" class="botter-bd">
+                  <el-col :span="6">
+                    <el-tag closable type="success" @close="DeleteRight(props.row.id,item2.id)">{{item2.authName}}</el-tag>
+                    <i class="el-icon-caret-right"></i>
+                  </el-col>
+                  <el-col :span="18">
+                    <el-tag closable type="warning" style="margin: 5px;" v-for="item3 in item2.children" @close="DeleteRight(props.row.id,item3.id)">{{item3.authName}}</el-tag>
+                    <i class="el-icon-caret-right"></i>
+                  </el-col>
+                </el-row>
+              </el-col>
+            </el-row>
+          </template>
+        </el-table-column>
         <!-- 索引列 -->
         <el-table-column type="index" label="#"></el-table-column>
-        <el-table-column prop="id" width="80px" label="角色id"></el-table-column>
+        <el-table-column prop="id" width="70%" label="角色id"></el-table-column>
         <el-table-column prop="roleName" label="角色名称"></el-table-column>
         <el-table-column prop="roleDesc" label="角色描述"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button type="primary" @click="editRoles(scope.row.id)" size="medium" icon="el-icon-edit">编辑</el-button>
             <el-button type="danger" @click="deleteRole(scope.row.id)" size="medium" icon="el-icon-delete">删除</el-button>
-            <el-button type="warning" size="medium" icon="el-icon-setting">分配权限</el-button>
+            <el-button type="warning" @click="showRights(scope.row)" size="medium" icon="el-icon-setting">分配权限</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -52,7 +76,7 @@
     </el-dialog>
     <!-- 编辑角色对话框 -->
     <el-dialog
-      title=""
+      title="编辑"
       :visible.sync="editRoleVisible"
       width="width"
       @close="editRoleClose">
@@ -72,10 +96,39 @@
         <el-button type="primary" @click="editRoleInfo">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 分配权限dialog -->
+    <el-dialog
+      title="分配权限"
+      :visible.sync="RightsDialogVisible"
+      width="50%"
+      @close="closeRight">
+      <!-- 树形控件 -->
+      <el-tree
+        :data="rightsList"
+        show-checkbox
+        node-key="id"
+        :default-expand-all="true"
+        :default-checked-keys="showCheckArr"
+        :props="RightProps"
+        ref="Rightstree">
+      </el-tree>
+      <!-- getCheckedKeys -->
+      <div slot="footer">
+        <el-button @click="RightsDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setRight">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+  // function fun(ele,arr) {
+  //   if(!ele.children){
+  //     return arr.push(ele.id)
+  //   }
+  //   // 递归
+  //   ele.children.forEach(item=>fun(item,arr))
+  // }
   export default {
     name: "Roles",
     data() {
@@ -104,21 +157,104 @@
         editFrom: {
           roleName: '',
           roleDesc: ''
-        }
+        },
+        // 控制权现况是否隐藏
+        RightsDialogVisible:false,
+        // 存储所有权限
+        rightsList:[],
+        // 展示选中的权限选项
+        showCheckArr:[],
+        // props属性选项
+        RightProps: {
+          label:'authName',
+          children:'children'
+        },
+        // 保存此时角色id
+        RoleId: Number
       }
     },
     created() {
       this.getRolesList()
     },
     methods: {
+      DeleteRight(roleId,rightId) {
+        this.$http.delete('roles/'+roleId+'/rights/'+rightId).then(res => {
+          if(res.data.meta.status == 200){
+            // 刷新权限下拉栏
+            this.getRolesList()
+            return this.$message.success('取消权限成功');
+          }else {
+            // 刷新权限下拉栏
+            this.getRolesList()
+            return this.$message.error('取消权限失败');
+          }
+        })
+      },
+      showRights(role) {
+        //展示分配权限
+        this.$http.get('rights/tree').then( res => {
+          if(res.data.meta.status !== 200){
+            return this.$message.error('获取权限列表失败');
+          }
+          this.rightsList = res.data.data;
+        })
+        // 用树形控件展示到dialog对话框
+        // 把此时角色所拥有的权限全部展示出来 dafault-checked-keys
+        // console.log(role)
+        // 把当前角色放到函数中去递归循环，把所得到的节点id放到showCheckArr数组中
+        this.getCheckedNodes(role,this.showCheckArr)
+        // console.log(this.showCheckArr)
+        // 展示dialog对话框
+        
+        // 保存角色id
+        this.RoleId = role.id;
+        this.RightsDialogVisible = !this.RightsDialogVisible
+      },
+      getCheckedNodes(node, arr){
+        if(!node.children){
+          return arr.push(node.id)
+        }
+        // 递归
+        node.children.forEach(item=>this.getCheckedNodes(item,arr))
+      },
+      // 关闭分配权限的dialog对话框时  对上一节点数据清空
+      closeRight() {
+        this.showCheckArr = []
+      },
+      // 点击确认按钮  发送后台数据  分配权限 
+      setRight() {
+
+        // console.log('全选',this.$refs.Rightstree.getCheckedKeys());
+        // console.log('半选',this.$refs.Rightstree.getHalfCheckedKeys());
+
+        // 获取所有全选节点id和半选节点id 并合并到一个数组
+        var arrCheckAllkeys=[...this.$refs.Rightstree.getCheckedKeys(),...this.$refs.Rightstree.getHalfCheckedKeys()]
+        // 将数组与字符串之间相互转换
+        arrCheckAllkeys = arrCheckAllkeys.join(',')
+        // console.log(typeof arrCheckAllkeys);   // 判断输出数据类型
+
+        // 发送给后台请求
+        console.log('roles/:'+ this.RoleId +'/rights');
+        this.$http.post('roles/'+ this.RoleId +'/rights',{rids: arrCheckAllkeys}).then(res => {
+          if(res.data.meta.status !== 200){
+            return this.$message.error('修改角色权限失败');
+          }
+          // 刷新角色列表
+          this.getRolesList()
+          this.$message.success('修改角色权限成功');
+        })
+
+        this.RightsDialogVisible = !this.RightsDialogVisible
+      },
       getRolesList() {
+        console.log('更新');
         this.$http.get('roles').then(re => {
           const res = re.data
           if(res.meta.status !== 200){
             return this.$message.error('获取角色列表失败');
           }
           this.rolesList = res.data
-          console.log(this.rolesList);
+          // console.log(this.rolesList);
         })
       },
       addRole() {
@@ -190,6 +326,16 @@
   };
 </script>
 
-<style lang="less" scoped>
-
+<style lang="less" scoped="scoped">
+  .botter-bd{
+    border-bottom: 1px solid #ddd;
+  }
+  .el-row {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .botter-bt{
+    border-top: 1px solid #ddd;
+  }
 </style>

@@ -21,7 +21,10 @@ const routes = [
       { path: '/welcome', component: welcome => import('components/content/Welcome.vue')},
       { path: '/users', component: user => import('views/user/User') },
       { path: '/rights', component: rights => import('views/power/Rights')},
-      { path: '/roles', component: roles => import('views/power/Roles')}
+      { path: '/roles', component: roles => import('views/power/Roles') },
+      { path: '/goods', component: goods => import('views/goods/Goods') },
+      { path: '/params', component: params => import('views/goods/Params') },
+      { path: '/categories', component: categories => import('views/goods/Categories') }
     ]
   }
 ]

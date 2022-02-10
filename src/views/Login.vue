@@ -25,7 +25,7 @@
 
 <script>
   export default {
-    name: "Login",
+    name: "login_container",
     data() {
       return {
         // 这是登录表单的数据绑定对象
