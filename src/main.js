@@ -3,6 +3,15 @@ import App from './App.vue'
 import router from './router'
 import './plugins/element.js'
 
+// 引用富文本
+import VueQuillEditor from 'vue-quill-editor'
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(VueQuillEditor)
+
 // 引用树形表格组件  用之前应先下载插件npm install vue-table-with-tree-grid -save
 import tree from 'vue-table-with-tree-grid'
 Vue.component('tree',tree)
@@ -19,7 +28,7 @@ import axios from 'axios'
 // 配置请求的根路径
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
 Vue.prototype.$http = axios
-// 添加拦截器***********************************************************************************************************************
+// 添加拦截器************************************************************************
 axios.interceptors.request.use(config => {
   // console.log(config);
   config.headers.Authorization = window.sessionStorage.getItem('token')

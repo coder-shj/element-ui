@@ -247,7 +247,7 @@
         this.RightsDialogVisible = !this.RightsDialogVisible
       },
       getRolesList() {
-        console.log('更新');
+        // console.log('更新');
         this.$http.get('roles').then(re => {
           const res = re.data
           if(res.meta.status !== 200){

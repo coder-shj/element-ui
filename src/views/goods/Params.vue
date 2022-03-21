@@ -23,7 +23,6 @@ export default {
   methods: {
     // 获取参数列表
     getParamsList() {
-      console.log('123');
     }
   }
 }

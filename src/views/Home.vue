@@ -79,6 +79,8 @@
         this.$http.get('menus').then(res => {
           if(res.data.meta.status !== 200) return this.$message.console.error(res.data.meat.msg);
           this.menulist = res.data.data
+          // 暂时不写
+          this.menulist[2].children.splice(1,1);
         })
       },
       // 点击按钮切换折叠与展开

@@ -27,7 +27,7 @@
         </template>
         <template slot="operation" slot-scope="scope">
           <el-tooltip effect="dark" content="编辑" placement="top" :enterable="false">
-            <el-button type="primary" icon="el-icon-edit" size="small">编辑</el-button>
+            <!-- <el-button type="primary" icon="el-icon-edit" size="small">编辑</el-button> -->
           </el-tooltip>
           <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
             <el-button type="warning" icon="el-icon-delete" size="small" @click="DeleteCategories(scope.row.cat_id)">删除</el-button>
@@ -62,7 +62,7 @@
           <el-form-item label="分类名称" prop="cat_name">
             <el-input v-model="addForm.cat_name"></el-input>
           </el-form-item>
-          <el-form-item label="分类层级">
+          <el-form-item label="分类层级" prop="cat_level">
             <el-select v-model="addForm.cat_level" placeholder="请选择分类层级">
               <el-option label="一级" value="0"></el-option>
               <el-option label="二级" value="1"></el-option>
@@ -105,7 +105,7 @@ export default {
         // 当前的页数
         pagenum: 1,
         // 当前每页显示多少条数据
-        pagesize: 10,
+        pagesize: 5,
       },
       // 数据总数
       total: 5,
@@ -142,7 +142,7 @@ export default {
           message:'分类名称必须在6~15个字符之间',
           trigger: 'blur'}
         ],
-        cat_name: [
+        cat_level: [
           {required: true, message:'请选择分类层级', trigger: 'blur'}
         ]
       }
@@ -188,7 +188,6 @@ export default {
     },
     // 添加分类
     setCategaries() {
-      console.log(this.addForm);
       this.$refs.addFromRef.validate(valid => {
         if(!valid) return this.$message.error('请输入合法数据');
         if(this.cat_level == '') return this.$message.error('请选择分类层级');
